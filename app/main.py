@@ -16,7 +16,7 @@ app = FastAPI(title="Symptom Checker API", version="1.2")
 # ------------------------------------------------------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # ⚠️ For local testing; restrict this for production
+    allow_origins=["https://symptom-checker-ai.vercel.app"],  # ⚠️ For local testing; restrict this for production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
