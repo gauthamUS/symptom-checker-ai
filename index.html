@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Symptom Checker AI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* --- STYLES UNCHANGED --- */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #e6f3ff 0%, #ffffff 100%);
+      color: #2d3748;
+      line-height: 1.6;
+      padding: 20px;
+    }
+
+    .container { max-width: 800px; margin: 0 auto; }
+
+    .header { text-align: center; margin-bottom: 40px; }
+    .app-title { font-size: 2.5rem; font-weight: 700; color: #2d3748; }
+    .app-subtitle { font-size: 1.1rem; color: #718096; margin-top: 8px; }
+
+    .main-card {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+      margin-bottom: 30px;
+      border: 1px solid rgba(59, 130, 246, 0.1);
+    }
+
+    .form-group { margin-bottom: 24px; }
+    .form-label { display: block; font-weight: 600; margin-bottom: 8px; }
+    .symptom-input, .select-input {
+      width: 100%; padding: 14px 16px;
+      border: 2px solid #e2e8f0; border-radius: 12px;
+      font-size: 1rem; background: #fafbfc;
+      transition: all 0.3s ease;
+    }
+    .symptom-input:focus, .select-input:focus {
+      outline: none; border-color: #3182ce; background: white;
+      box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+    }
+
+    .analyze-btn {
+      width: 100%; padding: 18px;
+      background: linear-gradient(135deg, #3182ce 0%, #38a169 100%);
+      color: white; border: none; border-radius: 16px;
+      font-size: 1.1rem; font-weight: 600; cursor: pointer;
+      transition: 0.3s ease; margin-top: 16px;
+    }
+
+    .analyze-btn:hover { transform: translateY(-2px); }
+
+    .loading { display: none; text-align: center; padding: 20px; }
+    .loading.show { display: block; }
+
+    .spinner {
+      width: 40px; height: 40px;
+      border: 4px solid #e2e8f0;
+      border-top: 4px solid #3182ce;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 16px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .results-section { opacity: 0; transform: translateY(20px); transition: all 0.6s ease; }
+    .results-section.show { opacity: 1; transform: translateY(0); }
+
+    .condition-card {
+      background: #fff; padding: 24px; border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+      margin-bottom: 16px;
+    }
+
+    .confidence-badge { padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; }
+    .confidence-high { background: #c6f6d5; color: #22543d; }
+    .confidence-medium { background: #fef5e7; color: #c05621; }
+    .confidence-low { background: #fed7d7; color: #c53030; }
+
+    .disclaimer {
+      background: linear-gradient(135deg, #fef5e7 0%, #fed7d7 100%);
+      border: 2px solid #f6ad55;
+      border-radius: 16px;
+      padding: 24px;
+      margin: 30px 0;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <h1 class="app-title">Symptom Checker AI</h1>
+      <p class="app-subtitle">Get AI-powered insights about your symptoms</p>
+    </header>
+
+    <!-- Input Form -->
+    <div class="main-card">
+      <form id="symptomForm">
+        <div class="form-group">
+          <label for="symptoms" class="form-label">Describe your symptoms</label>
+          <textarea id="symptoms" class="symptom-input" required placeholder="e.g., mild fever, cough for 3 days"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="age" class="form-label">Age</label>
+          <input id="age" class="select-input" placeholder="Enter your age (optional)">
+        </div>
+
+        <div class="form-group">
+          <label for="gender" class="form-label">Gender</label>
+          <select id="gender" class="select-input">
+            <option value="">Select gender</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="duration" class="form-label">Duration</label>
+          <input id="duration" class="select-input" placeholder="e.g., 3 days">
+        </div>
+
+        <button type="submit" class="analyze-btn">🔍 Analyze Symptoms</button>
+      </form>
+    </div>
+
+    <!-- Loading -->
+    <div id="loading" class="loading">
+      <div class="spinner"></div>
+      <p>Analyzing your symptoms...</p>
+    </div>
+
+    <!-- Results -->
+    <div id="results" class="results-section">
+      <div id="conditionsGrid"></div>
+      <div id="recommendationsList"></div>
+    </div>
+
+    <!-- Disclaimer -->
+    <div class="disclaimer">
+      ⚠️ This tool is for educational purposes only and not a substitute for professional medical advice.
+    </div>
+
+    <footer style="text-align:center; margin-top:20px; color:#666;">
+      Built with ❤️ by Gautham U S
+    </footer>
+  </div>
+
+  <!-- ✅ Connected JavaScript -->
+  <script>
+    document.getElementById('symptomForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const symptoms = document.getElementById('symptoms').value.trim();
+      const age = document.getElementById('age').value.trim();
+      const sex = document.getElementById('gender').value.trim();
+      const duration = document.getElementById('duration').value.trim();
+
+      if (!symptoms) {
+        alert('Please describe your symptoms before analyzing.');
+        return;
+      }
+
+      // Show loading
+      document.getElementById('loading').classList.add('show');
+      document.getElementById('results').classList.remove('show');
+
+      try {
+        const response = await fetch("http://127.0.0.1:8000/api/symptom-check", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            symptoms: symptoms,
+            age: age || null,
+            sex: sex || null,
+            duration: duration || null
+          })
+        });
+
+        const data = await response.json();
+        document.getElementById('loading').classList.remove('show');
+
+        if (!response.ok) {
+          throw new Error(data.detail || "API Error");
+        }
+
+        // --- Populate Results ---
+        const conditionsGrid = document.getElementById('conditionsGrid');
+        const recommendationsList = document.getElementById('recommendationsList');
+
+        conditionsGrid.innerHTML = "";
+        recommendationsList.innerHTML = "";
+
+        if (data.conditions && data.conditions.length > 0) {
+          data.conditions.forEach(cond => {
+            const card = document.createElement('div');
+            card.className = 'condition-card';
+            card.innerHTML = `
+              <h3>${cond.name}</h3>
+              <div class="confidence-badge confidence-${cond.confidence}">
+                ${cond.confidence.toUpperCase()} Confidence
+              </div>
+              <p>${cond.rationale || ''}</p>
+            `;
+            conditionsGrid.appendChild(card);
+          });
+        } else {
+          conditionsGrid.innerHTML = "<p>No specific conditions found. Try adding more detail.</p>";
+        }
+
+        if (data.recommendations && data.recommendations.length > 0) {
+          const ul = document.createElement('ul');
+          data.recommendations.forEach(rec => {
+            const li = document.createElement('li');
+            li.textContent = "• " + rec;
+            ul.appendChild(li);
+          });
+          recommendationsList.appendChild(ul);
+        } else {
+          recommendationsList.innerHTML = "<p>No recommendations available.</p>";
+        }
+
+        document.getElementById('results').classList.add('show');
+
+      } catch (err) {
+        document.getElementById('loading').classList.remove('show');
+        alert("Error: " + err.message);
+      }
+    });
+  </script>
+</body>
+</html>
