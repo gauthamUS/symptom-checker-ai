@@ -6,13 +6,13 @@ A simple educational healthcare symptom checker that uses an LLM (Large Language
 1. User enters symptoms (and optionally age, sex, duration).
 2. Backend sends the data to an LLM with safety prompts.
 3. LLM returns possible conditions, recommendations, and an educational disclaimer.
-4. (Optional) Stores the query and response in MongoDB.
+4. Stores the query and response in MongoDB.
 
 ## 🧠 Tech Stack
 - **Backend:** FastAPI (Python)
-- **Database:** MongoDB (optional)
+- **Database:** MongoDB
 - **LLM:** OpenAI API / compatible endpoint
-- **Frontend:** React + Tailwind (optional)
+- **Frontend:** React + Tailwind 
 
 ## ⚙️ Setup
 ```bash
